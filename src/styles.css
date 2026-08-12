@@ -84,7 +84,8 @@ body {
 
 .board {
   display: grid;
-  grid-template-columns: repeat(9, 24px);
+  grid-template-columns: repeat(var(--board-columns), 24px);
+  grid-template-rows: repeat(var(--board-rows), 24px);
   border: 3px solid;
   border-block-start-color: #808080;
   border-inline-start-color: #808080;
