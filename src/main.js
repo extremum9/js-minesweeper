@@ -23,4 +23,16 @@ const createBoard = (rows, columns) => {
   return board;
 };
 
+const drawBoard = (rows, columns) => {
+  let result = '';
+  for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+    for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
+      result += `<div class="cell" data-row="${rowIndex}" data-column="${columnIndex}"></div>`;
+    }
+  }
+  boardElement.innerHTML = result;
+};
+
 const board = createBoard(LEVELS.BEGINNER.rows, LEVELS.BEGINNER.columns);
+
+drawBoard(LEVELS.BEGINNER.rows, LEVELS.BEGINNER.columns);
