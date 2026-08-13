@@ -1,38 +1,37 @@
-const LEVELS = {
-  BEGINNER: { rows: 9, columns: 9, mines: 10 }
-};
+import { Minesweeper } from './minesweeper';
+
 const SELECTORS = {
   BOARD: '.js-board'
 };
 
+const minesweeper = new Minesweeper();
+
 const boardElement = document.querySelector(SELECTORS.BOARD);
-boardElement.style.setProperty('--board-rows', LEVELS.BEGINNER.rows);
-boardElement.style.setProperty('--board-columns', LEVELS.BEGINNER.columns);
 
-const createBoard = (rows, columns) => {
-  const board = [];
-  for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
-    const row = [];
-    for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
-      const cell = { mine: false, flagged: false, revealed: false };
-      row.push(cell);
-    }
-    board.push(row);
-  }
+let cellElements = [];
 
-  return board;
-};
-
-const drawBoard = (rows, columns) => {
-  let result = '';
-  for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
-    for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
-      result += `<div class="cell" data-row="${rowIndex}" data-column="${columnIndex}"></div>`;
+const drawBoard = () => {
+  boardElement.replaceChildren();
+  cellElements = Array.from({ length: minesweeper.rows }, () => Array(minesweeper.columns));
+  const fragment = new DocumentFragment();
+  for (let rowIndex = 0; rowIndex < minesweeper.rows; rowIndex++) {
+    for (let columnIndex = 0; columnIndex < minesweeper.columns; columnIndex++) {
+      const cellElement = document.createElement('div');
+      cellElement.className = 'cell';
+      cellElement.dataset.row = `${rowIndex}`;
+      cellElement.dataset.column = `${columnIndex}`;
+      cellElements[rowIndex][columnIndex] = cellElement;
+      fragment.append(cellElement);
     }
   }
-  boardElement.innerHTML = result;
+  boardElement.append(fragment);
 };
 
-const board = createBoard(LEVELS.BEGINNER.rows, LEVELS.BEGINNER.columns);
+const resetGame = (settings) => {
+  minesweeper.reset(settings || {});
+  boardElement.style.setProperty('--board-rows', minesweeper.rows);
+  boardElement.style.setProperty('--board-columns', minesweeper.columns);
+  drawBoard();
+};
 
-drawBoard(LEVELS.BEGINNER.rows, LEVELS.BEGINNER.columns);
+resetGame();
