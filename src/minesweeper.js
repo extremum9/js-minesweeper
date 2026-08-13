@@ -21,4 +21,29 @@ export class Minesweeper {
       Array.from({ length: columns }, () => ({ mine: false, flagged: false, revealed: false }))
     );
   }
+
+  placeMines(targetCell) {
+    let placed = 0;
+    while (placed < this.totalMines) {
+      const randomCell = {
+        rowIndex: Math.floor(Math.random() * this.rows),
+        columnIndex: Math.floor(Math.random() * this.columns)
+      };
+
+      if (this.#cellMath(targetCell, randomCell) || this.#hasMine(randomCell)) {
+        continue;
+      }
+
+      this.board[randomCell.rowIndex][randomCell.columnIndex].mine = true;
+      placed++;
+    }
+  }
+
+  #hasMine({ rowIndex, columnIndex }) {
+    return this.board[rowIndex][columnIndex].mine;
+  }
+
+  #cellMath(cellA, cellB) {
+    return cellA.rowIndex === cellB.rowIndex && cellA.columnIndex === cellB.columnIndex;
+  }
 }
