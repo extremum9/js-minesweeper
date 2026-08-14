@@ -17,33 +17,64 @@ export class Minesweeper {
     this.rows = rows;
     this.columns = columns;
     this.totalMines = totalMines;
+    this.firstClick = true;
     this.board = Array.from({ length: rows }, () =>
-      Array.from({ length: columns }, () => ({ mine: false, flagged: false, revealed: false }))
+      Array.from({ length: columns }, () => ({
+        mine: false,
+        flagged: false,
+        revealed: false,
+        adjacentMines: 0
+      }))
     );
   }
 
-  placeMines(targetCell) {
+  reveal(clickedCellPosition) {
+    if (this.firstClick) {
+      this.#placeMines(clickedCellPosition);
+      this.firstClick = false;
+    }
+    const cell = this.board[clickedCellPosition.row][clickedCellPosition.column];
+    cell.adjacentMines = this.#calculateAdjacentMines(clickedCellPosition);
+  }
+
+  #placeMines(clickedCellPosition) {
     let placed = 0;
     while (placed < this.totalMines) {
-      const randomCell = {
-        rowIndex: Math.floor(Math.random() * this.rows),
-        columnIndex: Math.floor(Math.random() * this.columns)
+      const randomCellPosition = {
+        row: Math.floor(Math.random() * this.rows),
+        column: Math.floor(Math.random() * this.columns)
       };
 
-      if (this.#cellMath(targetCell, randomCell) || this.#hasMine(randomCell)) {
+      if (
+        this.#cellMath(clickedCellPosition, randomCellPosition) ||
+        this.#hasMine(randomCellPosition.row, randomCellPosition.column)
+      ) {
         continue;
       }
 
-      this.board[randomCell.rowIndex][randomCell.columnIndex].mine = true;
+      this.board[randomCellPosition.row][randomCellPosition.column].mine = true;
       placed++;
     }
   }
 
-  #hasMine({ rowIndex, columnIndex }) {
-    return this.board[rowIndex][columnIndex].mine;
+  #calculateAdjacentMines({ row, column }) {
+    let adjacentMines = 0;
+    for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+      for (let columnOffset = -1; columnOffset <= 1; columnOffset++) {
+        const cell = this.board[row + rowOffset]?.[column + columnOffset];
+        if (cell?.mine) {
+          adjacentMines++;
+        }
+      }
+    }
+    return adjacentMines;
   }
 
-  #cellMath(cellA, cellB) {
-    return cellA.rowIndex === cellB.rowIndex && cellA.columnIndex === cellB.columnIndex;
+  #hasMine(row, column) {
+    return this.board[row][column].mine;
+  }
+
+  #cellMath(cellPositionA, cellPositionB) {
+    return cellPositionA.row === cellPositionB.row && cellPositionA.column === cellPositionB.column;
   }
 }

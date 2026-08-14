@@ -6,6 +6,11 @@ const SELECTORS = {
 
 const minesweeper = new Minesweeper();
 
+const getCellPosition = (cellElement) => ({
+  row: +cellElement.dataset.row,
+  column: +cellElement.dataset.column
+});
+
 const boardElement = document.querySelector(SELECTORS.BOARD);
 
 let cellElements = [];
@@ -14,13 +19,13 @@ const drawBoard = () => {
   boardElement.replaceChildren();
   cellElements = Array.from({ length: minesweeper.rows }, () => Array(minesweeper.columns));
   const fragment = new DocumentFragment();
-  for (let rowIndex = 0; rowIndex < minesweeper.rows; rowIndex++) {
-    for (let columnIndex = 0; columnIndex < minesweeper.columns; columnIndex++) {
+  for (let row = 0; row < minesweeper.rows; row++) {
+    for (let column = 0; column < minesweeper.columns; column++) {
       const cellElement = document.createElement('div');
       cellElement.className = 'cell';
-      cellElement.dataset.row = `${rowIndex}`;
-      cellElement.dataset.column = `${columnIndex}`;
-      cellElements[rowIndex][columnIndex] = cellElement;
+      cellElement.dataset.row = `${row}`;
+      cellElement.dataset.column = `${column}`;
+      cellElements[row][column] = cellElement;
       fragment.append(cellElement);
     }
   }
@@ -35,3 +40,7 @@ const resetGame = (settings) => {
 };
 
 resetGame();
+
+boardElement.addEventListener('click', ({ target }) => {
+  minesweeper.reveal(getCellPosition(target));
+});
