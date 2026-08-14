@@ -28,46 +28,45 @@ export class Minesweeper {
     );
   }
 
-  reveal(clickedCellPosition) {
+  reveal(row, column) {
     if (this.firstClick) {
-      this.#placeMines(clickedCellPosition);
+      this.#placeMines(row, column);
+      this.#calculateAdjacentMines();
       this.firstClick = false;
     }
-    const cell = this.board[clickedCellPosition.row][clickedCellPosition.column];
-    cell.adjacentMines = this.#calculateAdjacentMines(clickedCellPosition);
   }
 
-  #placeMines(clickedCellPosition) {
+  #placeMines(row, column) {
     let placed = 0;
     while (placed < this.totalMines) {
-      const randomCellPosition = {
-        row: Math.floor(Math.random() * this.rows),
-        column: Math.floor(Math.random() * this.columns)
-      };
-
+      const randomRow = Math.floor(Math.random() * this.rows);
+      const randomColumn = Math.floor(Math.random() * this.columns);
       if (
-        this.#cellMath(clickedCellPosition, randomCellPosition) ||
-        this.#hasMine(randomCellPosition.row, randomCellPosition.column)
+        this.#cellMath({ row, column }, { row: randomRow, column: randomColumn }) ||
+        this.#hasMine(randomRow, randomColumn)
       ) {
         continue;
       }
-
-      this.board[randomCellPosition.row][randomCellPosition.column].mine = true;
+      this.board[randomRow][randomColumn].mine = true;
       placed++;
     }
   }
 
-  #calculateAdjacentMines({ row, column }) {
-    let adjacentMines = 0;
-    for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
-      for (let columnOffset = -1; columnOffset <= 1; columnOffset++) {
-        const cell = this.board[row + rowOffset]?.[column + columnOffset];
-        if (cell?.mine) {
-          adjacentMines++;
+  #calculateAdjacentMines() {
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        if (this.#hasMine(row, column)) {
+          for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+            for (let columnOffset = -1; columnOffset <= 1; columnOffset++) {
+              const cell = this.board[row + rowOffset]?.[column + columnOffset];
+              if (cell && !cell.mine) {
+                cell.adjacentMines++;
+              }
+            }
+          }
         }
       }
     }
-    return adjacentMines;
   }
 
   #hasMine(row, column) {

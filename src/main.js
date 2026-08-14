@@ -4,6 +4,17 @@ const SELECTORS = {
   BOARD: '.js-board'
 };
 
+const STATE_CLASSES = {
+  FLAGGED: 'flagged',
+  REVEALED: 'revealed',
+  MINE: 'mine',
+  NUMBER: 'number'
+};
+const EMOJI = {
+  FLAG: '🚩',
+  BOMB: '💣'
+};
+
 const minesweeper = new Minesweeper();
 
 const getCellPosition = (cellElement) => ({
@@ -42,5 +53,6 @@ const resetGame = (settings) => {
 resetGame();
 
 boardElement.addEventListener('click', ({ target }) => {
-  minesweeper.reveal(getCellPosition(target));
+  const { row, column } = getCellPosition(target);
+  minesweeper.reveal(row, column);
 });
