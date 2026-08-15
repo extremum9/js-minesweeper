@@ -38,9 +38,9 @@ export class Minesweeper {
     }
 
     if (this.firstClick) {
+      this.firstClick = false;
       this.#placeMines(row, column);
       this.#calculateAdjacentMines();
-      this.firstClick = false;
     }
     cell.revealed = true;
 
@@ -51,6 +51,10 @@ export class Minesweeper {
       return { cellsToUpdate: mines };
     }
 
+    return { cellsToUpdate: this.#floodFill(row, column) };
+  }
+
+  #floodFill(row, column) {
     const cellsToUpdate = [];
     const stack = [[row, column]];
     while (stack.length) {
@@ -63,17 +67,17 @@ export class Minesweeper {
       if (currentCell.adjacentMines === 0) {
         for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
           for (let columnOffset = -1; columnOffset <= 1; columnOffset++) {
-            const adjacentCell = this.board[currentRow + rowOffset]?.[currentColumn + columnOffset];
-            if (adjacentCell && !adjacentCell.revealed && !adjacentCell.flagged) {
-              adjacentCell.revealed = true;
-              stack.push([adjacentCell.row, adjacentCell.column]);
+            const cell = this.board[currentRow + rowOffset]?.[currentColumn + columnOffset];
+            if (cell && !cell.revealed && !cell.flagged) {
+              cell.revealed = true;
+              stack.push([cell.row, cell.column]);
             }
           }
         }
       }
     }
 
-    return { cellsToUpdate };
+    return cellsToUpdate;
   }
 
   #placeMines(row, column) {
@@ -82,7 +86,7 @@ export class Minesweeper {
       const randomRow = Math.floor(Math.random() * this.rows);
       const randomColumn = Math.floor(Math.random() * this.columns);
       if (
-        this.#cellMath({ row, column }, { row: randomRow, column: randomColumn }) ||
+        this.#cellMath([row, column], [randomRow, randomColumn]) ||
         this.#hasMine(randomRow, randomColumn)
       ) {
         continue;
@@ -121,6 +125,6 @@ export class Minesweeper {
   }
 
   #cellMath(cellPositionA, cellPositionB) {
-    return cellPositionA.row === cellPositionB.row && cellPositionA.column === cellPositionB.column;
+    return cellPositionA[0] === cellPositionB[0] && cellPositionA[1] === cellPositionB[1];
   }
 }
