@@ -32,12 +32,8 @@ export class Minesweeper {
   }
 
   reveal(row, column) {
-    if (this.gameOver) {
-      return { cellsToUpdate: [] };
-    }
-
-    const currentCell = this.board[row][column];
-    if (currentCell.revealed || currentCell.flagged) {
+    const cell = this.board[row][column];
+    if (cell.revealed || cell.flagged || this.gameOver) {
       return { cellsToUpdate: [] };
     }
 
@@ -46,16 +42,38 @@ export class Minesweeper {
       this.#calculateAdjacentMines();
       this.firstClick = false;
     }
-    currentCell.revealed = true;
+    cell.revealed = true;
 
-    if (currentCell.mine) {
+    if (cell.mine) {
       const mines = this.#getMines();
       this.gameOver = true;
 
       return { cellsToUpdate: mines };
     }
 
-    return { cellsToUpdate: [] };
+    const cellsToUpdate = [];
+    const stack = [[row, column]];
+    while (stack.length) {
+      const position = stack.pop();
+      const currentRow = position[0];
+      const currentColumn = position[1];
+      const currentCell = this.board[currentRow][currentColumn];
+      cellsToUpdate.push(currentCell);
+
+      if (currentCell.adjacentMines === 0) {
+        for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+          for (let columnOffset = -1; columnOffset <= 1; columnOffset++) {
+            const adjacentCell = this.board[currentRow + rowOffset]?.[currentColumn + columnOffset];
+            if (adjacentCell && !adjacentCell.revealed && !adjacentCell.flagged) {
+              adjacentCell.revealed = true;
+              stack.push([adjacentCell.row, adjacentCell.column]);
+            }
+          }
+        }
+      }
+    }
+
+    return { cellsToUpdate };
   }
 
   #placeMines(row, column) {

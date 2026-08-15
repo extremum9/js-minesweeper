@@ -61,9 +61,10 @@ boardElement.addEventListener('click', ({ target }) => {
   if (!target.classList.contains(STATE_CLASSES.CELL)) {
     return;
   }
+
   const { row, column } = getCellPosition(target);
   const { cellsToUpdate } = minesweeper.reveal(row, column);
-  cellsToUpdate.forEach(({ row: currentRow, column: currentColumn, mine }) => {
+  cellsToUpdate.forEach(({ row: currentRow, column: currentColumn, mine, adjacentMines }) => {
     const cellElement = cellElements[currentRow][currentColumn];
     cellElement.classList.add(STATE_CLASSES.REVEALED);
     if (mine) {
@@ -71,8 +72,12 @@ boardElement.addEventListener('click', ({ target }) => {
         cellElement.classList.add(STATE_CLASSES.MINE);
       }
       cellElement.textContent = EMOJI.BOMB;
+    } else if (adjacentMines > 0) {
+      cellElement.classList.add(`${STATE_CLASSES.NUMBER}-${adjacentMines}`);
+      cellElement.textContent = `${adjacentMines}`;
     }
   });
+
   if (minesweeper.gameOver) {
     smileyButtonElement.textContent = EMOJI.SKULL;
     boardElement.style.pointerEvents = 'none';
