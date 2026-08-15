@@ -1,29 +1,33 @@
 import { Minesweeper } from './minesweeper';
 
 const SELECTORS = {
+  SMILEY_BUTTON: '.js-smiley-button',
   BOARD: '.js-board'
 };
-
 const STATE_CLASSES = {
   FLAGGED: 'flagged',
   REVEALED: 'revealed',
+  CELL: 'cell',
   MINE: 'mine',
   NUMBER: 'number'
 };
 const EMOJI = {
   FLAG: '🚩',
-  BOMB: '💣'
+  BOMB: '💣',
+  SMILE: '🙂',
+  SKULL: '💀'
 };
-
-const minesweeper = new Minesweeper();
 
 const getCellPosition = (cellElement) => ({
   row: +cellElement.dataset.row,
   column: +cellElement.dataset.column
 });
 
-const boardElement = document.querySelector(SELECTORS.BOARD);
+const minesweeper = new Minesweeper();
 
+const smileyButtonElement = document.querySelector(SELECTORS.SMILEY_BUTTON);
+smileyButtonElement.textContent = EMOJI.SMILE;
+const boardElement = document.querySelector(SELECTORS.BOARD);
 let cellElements = [];
 
 const drawBoard = () => {
@@ -33,7 +37,7 @@ const drawBoard = () => {
   for (let row = 0; row < minesweeper.rows; row++) {
     for (let column = 0; column < minesweeper.columns; column++) {
       const cellElement = document.createElement('div');
-      cellElement.className = 'cell';
+      cellElement.className = STATE_CLASSES.CELL;
       cellElement.dataset.row = `${row}`;
       cellElement.dataset.column = `${column}`;
       cellElements[row][column] = cellElement;
@@ -45,6 +49,7 @@ const drawBoard = () => {
 
 const resetGame = (settings) => {
   minesweeper.reset(settings || {});
+  boardElement.style.pointerEvents = '';
   boardElement.style.setProperty('--board-rows', minesweeper.rows);
   boardElement.style.setProperty('--board-columns', minesweeper.columns);
   drawBoard();
@@ -53,6 +58,23 @@ const resetGame = (settings) => {
 resetGame();
 
 boardElement.addEventListener('click', ({ target }) => {
+  if (!target.classList.contains(STATE_CLASSES.CELL)) {
+    return;
+  }
   const { row, column } = getCellPosition(target);
-  minesweeper.reveal(row, column);
+  const { cellsToUpdate } = minesweeper.reveal(row, column);
+  cellsToUpdate.forEach(({ row: currentRow, column: currentColumn, mine }) => {
+    const cellElement = cellElements[currentRow][currentColumn];
+    cellElement.classList.add(STATE_CLASSES.REVEALED);
+    if (mine) {
+      if (currentRow === row && currentColumn === column) {
+        cellElement.classList.add(STATE_CLASSES.MINE);
+      }
+      cellElement.textContent = EMOJI.BOMB;
+    }
+  });
+  if (minesweeper.gameOver) {
+    smileyButtonElement.textContent = EMOJI.SKULL;
+    boardElement.style.pointerEvents = 'none';
+  }
 });

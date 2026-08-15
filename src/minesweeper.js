@@ -18,8 +18,11 @@ export class Minesweeper {
     this.columns = columns;
     this.totalMines = totalMines;
     this.firstClick = true;
-    this.board = Array.from({ length: rows }, () =>
-      Array.from({ length: columns }, () => ({
+    this.gameOver = false;
+    this.board = Array.from({ length: rows }, (_, row) =>
+      Array.from({ length: columns }, (_, column) => ({
+        row,
+        column,
         mine: false,
         flagged: false,
         revealed: false,
@@ -29,11 +32,30 @@ export class Minesweeper {
   }
 
   reveal(row, column) {
+    if (this.gameOver) {
+      return { cellsToUpdate: [] };
+    }
+
+    const currentCell = this.board[row][column];
+    if (currentCell.revealed || currentCell.flagged) {
+      return { cellsToUpdate: [] };
+    }
+
     if (this.firstClick) {
       this.#placeMines(row, column);
       this.#calculateAdjacentMines();
       this.firstClick = false;
     }
+    currentCell.revealed = true;
+
+    if (currentCell.mine) {
+      const mines = this.#getMines();
+      this.gameOver = true;
+
+      return { cellsToUpdate: mines };
+    }
+
+    return { cellsToUpdate: [] };
   }
 
   #placeMines(row, column) {
@@ -67,6 +89,13 @@ export class Minesweeper {
         }
       }
     }
+  }
+
+  #getMines() {
+    return this.board.reduce(
+      (accumulator, cells) => [...accumulator, ...cells.filter((cell) => cell.mine)],
+      []
+    );
   }
 
   #hasMine(row, column) {
