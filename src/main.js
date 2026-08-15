@@ -1,11 +1,11 @@
 import { Minesweeper } from './minesweeper';
 
 const SELECTORS = {
+  MINE_COUNT: '.js-mine-count',
   SMILEY_BUTTON: '.js-smiley-button',
   BOARD: '.js-board'
 };
 const STATE_CLASSES = {
-  FLAGGED: 'flagged',
   REVEALED: 'revealed',
   CELL: 'cell',
   MINE: 'mine',
@@ -25,6 +25,8 @@ const getCellPosition = (cellElement) => ({
 
 const minesweeper = new Minesweeper();
 
+const mineCountElement = document.querySelector(SELECTORS.MINE_COUNT);
+mineCountElement.textContent = `${minesweeper.mineCount}`.padStart(3, '0');
 const smileyButtonElement = document.querySelector(SELECTORS.SMILEY_BUTTON);
 smileyButtonElement.textContent = EMOJI.SMILE;
 const boardElement = document.querySelector(SELECTORS.BOARD);
@@ -49,6 +51,7 @@ const drawBoard = () => {
 
 const resetGame = (settings) => {
   minesweeper.reset(settings || {});
+  mineCountElement.textContent = `${minesweeper.mineCount}`.padStart(3, '0');
   boardElement.style.pointerEvents = '';
   boardElement.style.setProperty('--board-rows', minesweeper.rows);
   boardElement.style.setProperty('--board-columns', minesweeper.columns);
@@ -57,7 +60,8 @@ const resetGame = (settings) => {
 
 resetGame();
 
-boardElement.addEventListener('click', ({ target }) => {
+boardElement.addEventListener('click', (event) => {
+  const target = event.target;
   if (!target.classList.contains(STATE_CLASSES.CELL)) {
     return;
   }
@@ -82,4 +86,18 @@ boardElement.addEventListener('click', ({ target }) => {
     smileyButtonElement.textContent = EMOJI.SKULL;
     boardElement.style.pointerEvents = 'none';
   }
+});
+
+boardElement.addEventListener('contextmenu', (event) => {
+  event.preventDefault();
+
+  const target = event.target;
+  if (!target.classList.contains(STATE_CLASSES.CELL)) {
+    return;
+  }
+
+  const { row, column } = getCellPosition(target);
+  const flagged = minesweeper.toggleFlag(row, column);
+  target.textContent = flagged ? EMOJI.FLAG : '';
+  mineCountElement.textContent = `${minesweeper.mineCount}`.padStart(3, '0');
 });

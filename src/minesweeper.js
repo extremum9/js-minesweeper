@@ -17,6 +17,7 @@ export class Minesweeper {
     this.rows = rows;
     this.columns = columns;
     this.totalMines = totalMines;
+    this.mineCount = totalMines;
     this.firstClick = true;
     this.gameOver = false;
     this.board = Array.from({ length: rows }, (_, row) =>
@@ -45,13 +46,24 @@ export class Minesweeper {
     cell.revealed = true;
 
     if (cell.mine) {
-      const mines = this.#getMines();
       this.gameOver = true;
 
-      return { cellsToUpdate: mines };
+      return { cellsToUpdate: this.#getMines() };
     }
 
     return { cellsToUpdate: this.#floodFill(row, column) };
+  }
+
+  toggleFlag(row, column) {
+    const cell = this.board[row][column];
+    if (cell.revealed || this.gameOver || (this.mineCount === 0 && !cell.flagged)) {
+      return false;
+    }
+
+    cell.flagged = !cell.flagged;
+    this.mineCount += cell.flagged ? -1 : 1;
+
+    return cell.flagged;
   }
 
   #floodFill(row, column) {
