@@ -109,7 +109,10 @@ boardElement.addEventListener('contextmenu', (event) => {
   }
 
   const target = event.target;
-  if (!target.classList.contains(STATE_CLASSES.CELL)) {
+  if (
+    !target.classList.contains(STATE_CLASSES.CELL) ||
+    target.classList.contains(STATE_CLASSES.REVEALED)
+  ) {
     return;
   }
 
