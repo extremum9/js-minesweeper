@@ -118,6 +118,10 @@ body {
     background-color: #ff0000;
   }
 
+  &.incorrect-flag {
+    background-color: #f68686;
+  }
+
   &.number-1 {
     color: #0000ff;
   }

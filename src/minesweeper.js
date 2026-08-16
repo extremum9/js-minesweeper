@@ -48,7 +48,7 @@ export class Minesweeper {
     if (cell.mine) {
       this.gameOver = true;
 
-      return { cellsToUpdate: this.#getMines() };
+      return { cellsToUpdate: [...this.#getNonFlaggedMines(), ...this.#getIncorrectFlags()] };
     }
 
     return { cellsToUpdate: this.#floodFill(row, column) };
@@ -56,8 +56,8 @@ export class Minesweeper {
 
   toggleFlag(row, column) {
     const cell = this.board[row][column];
-    if (cell.revealed || this.gameOver || (this.mineCount === 0 && !cell.flagged)) {
-      return false;
+    if (cell.revealed || (!cell.flagged && this.mineCount === 0) || this.gameOver) {
+      return cell.flagged;
     }
 
     cell.flagged = !cell.flagged;
@@ -125,11 +125,12 @@ export class Minesweeper {
     }
   }
 
-  #getMines() {
-    return this.board.reduce(
-      (accumulator, cells) => [...accumulator, ...cells.filter((cell) => cell.mine)],
-      []
-    );
+  #getNonFlaggedMines() {
+    return this.board.flatMap((row) => row.filter((cell) => cell.mine && !cell.flagged));
+  }
+
+  #getIncorrectFlags() {
+    return this.board.flatMap((row) => row.filter((cell) => cell.flagged && !cell.mine));
   }
 
   #hasMine(row, column) {

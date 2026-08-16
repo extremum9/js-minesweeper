@@ -1,4 +1,5 @@
 import { Minesweeper } from './minesweeper';
+import { getCellPosition, padNumberWithZeros } from './utilities';
 
 const SELECTORS = {
   MINE_COUNT: '.js-mine-count',
@@ -9,6 +10,7 @@ const STATE_CLASSES = {
   REVEALED: 'revealed',
   CELL: 'cell',
   MINE: 'mine',
+  INCORRECT_FLAG: 'incorrect-flag',
   NUMBER: 'number'
 };
 const EMOJI = {
@@ -18,15 +20,10 @@ const EMOJI = {
   SKULL: '💀'
 };
 
-const getCellPosition = (cellElement) => ({
-  row: +cellElement.dataset.row,
-  column: +cellElement.dataset.column
-});
-
 const minesweeper = new Minesweeper();
 
 const mineCountElement = document.querySelector(SELECTORS.MINE_COUNT);
-mineCountElement.textContent = `${minesweeper.mineCount}`.padStart(3, '0');
+mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
 const smileyButtonElement = document.querySelector(SELECTORS.SMILEY_BUTTON);
 smileyButtonElement.textContent = EMOJI.SMILE;
 const boardElement = document.querySelector(SELECTORS.BOARD);
@@ -51,7 +48,7 @@ const drawBoard = () => {
 
 const resetGame = (settings) => {
   minesweeper.reset(settings || {});
-  mineCountElement.textContent = `${minesweeper.mineCount}`.padStart(3, '0');
+  mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
   boardElement.style.pointerEvents = '';
   boardElement.style.setProperty('--board-rows', minesweeper.rows);
   boardElement.style.setProperty('--board-columns', minesweeper.columns);
@@ -61,6 +58,10 @@ const resetGame = (settings) => {
 resetGame();
 
 boardElement.addEventListener('click', (event) => {
+  if (minesweeper.gameOver) {
+    return;
+  }
+
   const target = event.target;
   if (!target.classList.contains(STATE_CLASSES.CELL)) {
     return;
@@ -68,19 +69,29 @@ boardElement.addEventListener('click', (event) => {
 
   const { row, column } = getCellPosition(target);
   const { cellsToUpdate } = minesweeper.reveal(row, column);
-  cellsToUpdate.forEach(({ row: currentRow, column: currentColumn, mine, adjacentMines }) => {
-    const cellElement = cellElements[currentRow][currentColumn];
-    cellElement.classList.add(STATE_CLASSES.REVEALED);
-    if (mine) {
-      if (currentRow === row && currentColumn === column) {
-        cellElement.classList.add(STATE_CLASSES.MINE);
+  if (!cellsToUpdate.length) {
+    return;
+  }
+
+  cellsToUpdate.forEach(
+    ({ row: currentRow, column: currentColumn, mine, flagged, adjacentMines }) => {
+      const cellElement = cellElements[currentRow][currentColumn];
+      if (flagged) {
+        return cellElement.classList.add(STATE_CLASSES.INCORRECT_FLAG);
       }
-      cellElement.textContent = EMOJI.BOMB;
-    } else if (adjacentMines > 0) {
-      cellElement.classList.add(`${STATE_CLASSES.NUMBER}-${adjacentMines}`);
-      cellElement.textContent = `${adjacentMines}`;
+
+      cellElement.classList.add(STATE_CLASSES.REVEALED);
+      if (mine) {
+        if (currentRow === row && currentColumn === column) {
+          cellElement.classList.add(STATE_CLASSES.MINE);
+        }
+        cellElement.textContent = EMOJI.BOMB;
+      } else if (adjacentMines > 0) {
+        cellElement.classList.add(`${STATE_CLASSES.NUMBER}-${adjacentMines}`);
+        cellElement.textContent = `${adjacentMines}`;
+      }
     }
-  });
+  );
 
   if (minesweeper.gameOver) {
     smileyButtonElement.textContent = EMOJI.SKULL;
@@ -90,6 +101,9 @@ boardElement.addEventListener('click', (event) => {
 
 boardElement.addEventListener('contextmenu', (event) => {
   event.preventDefault();
+  if (minesweeper.gameOver) {
+    return;
+  }
 
   const target = event.target;
   if (!target.classList.contains(STATE_CLASSES.CELL)) {
@@ -99,5 +113,5 @@ boardElement.addEventListener('contextmenu', (event) => {
   const { row, column } = getCellPosition(target);
   const flagged = minesweeper.toggleFlag(row, column);
   target.textContent = flagged ? EMOJI.FLAG : '';
-  mineCountElement.textContent = `${minesweeper.mineCount}`.padStart(3, '0');
+  mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
 });
