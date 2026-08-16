@@ -49,6 +49,7 @@ const drawBoard = () => {
 const resetGame = (settings) => {
   minesweeper.reset(settings || {});
   mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
+  smileyButtonElement.textContent = EMOJI.SMILE;
   boardElement.style.pointerEvents = '';
   boardElement.style.setProperty('--board-rows', minesweeper.rows);
   boardElement.style.setProperty('--board-columns', minesweeper.columns);
@@ -56,6 +57,8 @@ const resetGame = (settings) => {
 };
 
 resetGame();
+
+smileyButtonElement.addEventListener('click', resetGame);
 
 boardElement.addEventListener('click', (event) => {
   if (minesweeper.gameOver) {
