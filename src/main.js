@@ -1,7 +1,8 @@
-import { Minesweeper } from './minesweeper';
+import { LEVELS, Minesweeper } from './minesweeper';
 import { getCellPosition, padNumberWithZeros } from './utilities';
 
 const SELECTORS = {
+  LEVELS: '.js-levels',
   MINE_COUNT: '.js-mine-count',
   SMILEY_BUTTON: '.js-smiley-button',
   BOARD: '.js-board'
@@ -22,6 +23,7 @@ const EMOJI = {
 
 const minesweeper = new Minesweeper();
 
+const levelsElement = document.querySelector(SELECTORS.LEVELS);
 const mineCountElement = document.querySelector(SELECTORS.MINE_COUNT);
 mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
 const smileyButtonElement = document.querySelector(SELECTORS.SMILEY_BUTTON);
@@ -58,7 +60,15 @@ const resetGame = (settings) => {
 
 resetGame();
 
-smileyButtonElement.addEventListener('click', resetGame);
+levelsElement.addEventListener('click', (event) => {
+  const target = event.target;
+  const level = target.dataset.level;
+  if (level) {
+    resetGame(LEVELS[level]);
+  }
+});
+
+smileyButtonElement.addEventListener('click', () => resetGame());
 
 boardElement.addEventListener('click', (event) => {
   if (minesweeper.gameOver) {

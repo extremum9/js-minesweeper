@@ -8,16 +8,16 @@ export class Minesweeper {
   constructor(
     rows = LEVELS.BEGINNER.rows,
     columns = LEVELS.BEGINNER.columns,
-    totalMines = LEVELS.BEGINNER.mines
+    mines = LEVELS.BEGINNER.mines
   ) {
-    this.reset({ rows, columns, totalMines });
+    this.reset({ rows, columns, mines });
   }
 
-  reset({ rows = this.rows, columns = this.columns, totalMines = this.totalMines }) {
+  reset({ rows = this.rows, columns = this.columns, mines = this.totalMines }) {
     this.rows = rows;
     this.columns = columns;
-    this.totalMines = totalMines;
-    this.mineCount = totalMines;
+    this.totalMines = mines;
+    this.mineCount = mines;
     this.firstClick = true;
     this.gameOver = false;
     this.board = Array.from({ length: rows }, (_, row) =>

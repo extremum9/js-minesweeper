@@ -1,8 +1,10 @@
 @import url('./reset.css');
 
 body {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   font-family:
     system-ui,
     -apple-system,
@@ -16,6 +18,33 @@ body {
     'Helvetica Neue',
     sans-serif;
   background-color: #008080;
+}
+
+.levels {
+  display: flex;
+  gap: 10px;
+  margin-block-end: 12px;
+  justify-content: center;
+}
+
+.level-button {
+  padding-block: 4px;
+  padding-inline: 12px;
+  border: 2px solid;
+  border-block-start-color: #ffffff;
+  border-inline-start-color: #ffffff;
+  border-inline-end-color: #808080;
+  border-block-end-color: #808080;
+  font-size: 14px;
+  background-color: #c0c0c0;
+  cursor: pointer;
+  user-select: none;
+  &:active {
+    border-block-start-color: #808080;
+    border-inline-start-color: #808080;
+    border-inline-end-color: #ffffff;
+    border-block-end-color: #ffffff;
+  }
 }
 
 .frame {
