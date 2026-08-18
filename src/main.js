@@ -5,6 +5,7 @@ const SELECTORS = {
   LEVELS: '.js-levels',
   MINE_COUNT: '.js-mine-count',
   SMILEY_BUTTON: '.js-smiley-button',
+  TIMER: '.js-timer',
   BOARD: '.js-board'
 };
 const STATE_CLASSES = {
@@ -21,15 +22,43 @@ const EMOJI = {
   SKULL: '💀'
 };
 
+const MAX_DISPLAY_TIME = 999;
+
 const minesweeper = new Minesweeper();
+let seconds = 0;
+let timerId = null;
 
 const levelsElement = document.querySelector(SELECTORS.LEVELS);
 const mineCountElement = document.querySelector(SELECTORS.MINE_COUNT);
 mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
 const smileyButtonElement = document.querySelector(SELECTORS.SMILEY_BUTTON);
 smileyButtonElement.textContent = EMOJI.SMILE;
+const timerElement = document.querySelector(SELECTORS.TIMER);
 const boardElement = document.querySelector(SELECTORS.BOARD);
 let cellElements = [];
+
+const startTimer = () => {
+  if (timerId) {
+    return;
+  }
+  timerId = setInterval(() => {
+    seconds++;
+    if (seconds <= MAX_DISPLAY_TIME) {
+      timerElement.textContent = padNumberWithZeros(seconds);
+    }
+  }, 1000);
+};
+
+const stopTimer = () => {
+  clearInterval(timerId);
+  timerId = null;
+};
+
+const resetTimer = () => {
+  stopTimer();
+  seconds = 0;
+  timerElement.textContent = padNumberWithZeros(seconds);
+};
 
 const drawBoard = () => {
   boardElement.replaceChildren();
@@ -48,21 +77,21 @@ const drawBoard = () => {
   boardElement.append(fragment);
 };
 
-const resetGame = (settings) => {
-  minesweeper.reset(settings || {});
+const resetGame = (settings = {}) => {
+  minesweeper.reset(settings);
   mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
   smileyButtonElement.textContent = EMOJI.SMILE;
   boardElement.style.pointerEvents = '';
   boardElement.style.setProperty('--board-rows', minesweeper.rows);
   boardElement.style.setProperty('--board-columns', minesweeper.columns);
+  resetTimer();
   drawBoard();
 };
 
 resetGame();
 
 levelsElement.addEventListener('click', (event) => {
-  const target = event.target;
-  const level = target.dataset.level;
+  const level = event.target.dataset.level;
   if (level) {
     resetGame(LEVELS[level]);
   }
@@ -79,6 +108,8 @@ boardElement.addEventListener('click', (event) => {
   if (!target.classList.contains(STATE_CLASSES.CELL)) {
     return;
   }
+
+  startTimer();
 
   const { row, column } = getCellPosition(target);
   const { cellsToUpdate } = minesweeper.reveal(row, column);
@@ -107,6 +138,7 @@ boardElement.addEventListener('click', (event) => {
   );
 
   if (minesweeper.gameOver) {
+    stopTimer();
     smileyButtonElement.textContent = EMOJI.SKULL;
     boardElement.style.pointerEvents = 'none';
   }
