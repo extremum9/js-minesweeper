@@ -19,6 +19,7 @@ const EMOJI = {
   FLAG: '🚩',
   BOMB: '💣',
   SMILE: '🙂',
+  COOL_FACE: '😎',
   SKULL: '💀'
 };
 
@@ -139,7 +140,7 @@ boardElement.addEventListener('click', (event) => {
 
   if (minesweeper.gameOver) {
     stopTimer();
-    smileyButtonElement.textContent = EMOJI.SKULL;
+    smileyButtonElement.textContent = minesweeper.gameWon ? EMOJI.COOL_FACE : EMOJI.SKULL;
     boardElement.style.pointerEvents = 'none';
   }
 });

@@ -18,8 +18,11 @@ export class Minesweeper {
     this.columns = columns;
     this.totalMines = mines;
     this.mineCount = mines;
+    this.revealedCount = 0;
+    this.maxRevealed = rows * columns - mines;
     this.firstClick = true;
     this.gameOver = false;
+    this.gameWon = false;
     this.board = Array.from({ length: rows }, (_, row) =>
       Array.from({ length: columns }, (_, column) => ({
         row,
@@ -43,6 +46,7 @@ export class Minesweeper {
       this.#placeMines(row, column);
       this.#calculateAdjacentMines();
     }
+
     cell.revealed = true;
 
     if (cell.mine) {
@@ -51,7 +55,15 @@ export class Minesweeper {
       return { cellsToUpdate: [...this.#getNonFlaggedMines(), ...this.#getIncorrectFlags()] };
     }
 
-    return { cellsToUpdate: this.#floodFill(row, column) };
+    this.revealedCount++;
+
+    const cellsToUpdate = this.#floodFill(row, column);
+    if (this.revealedCount === this.maxRevealed) {
+      this.gameOver = true;
+      this.gameWon = true;
+    }
+
+    return { cellsToUpdate };
   }
 
   toggleFlag(row, column) {
@@ -82,6 +94,7 @@ export class Minesweeper {
             const cell = this.board[currentRow + rowOffset]?.[currentColumn + columnOffset];
             if (cell && !cell.revealed && !cell.flagged) {
               cell.revealed = true;
+              this.revealedCount++;
               stack.push([cell.row, cell.column]);
             }
           }
