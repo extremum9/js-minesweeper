@@ -1,26 +1,27 @@
 import { LEVELS, Minesweeper } from './minesweeper';
-import { getCellPosition, padNumberWithZeros } from './utilities';
+import { getBackgroundImageUrl, getCellPosition, padNumberWithZeros } from './utilities';
 
 const SELECTORS = {
   LEVELS: '.js-levels',
-  MINE_COUNT: '.js-mine-count',
-  SMILEY_BUTTON: '.js-smiley-button',
+  MINE_COUNTER: '.js-mine-counter',
+  RESET_BUTTON: '.js-reset-button',
   TIMER: '.js-timer',
   BOARD: '.js-board'
 };
 const STATE_CLASSES = {
+  ACTIVE: 'active',
   REVEALED: 'revealed',
   CELL: 'cell',
   MINE: 'mine',
-  INCORRECT_FLAG: 'incorrect-flag',
   NUMBER: 'number'
 };
-const EMOJI = {
-  FLAG: '🚩',
-  BOMB: '💣',
-  SMILE: '🙂',
-  COOL_FACE: '😎',
-  SKULL: '💀'
+const IMAGE_FILENAMES = {
+  SMILEY_FACE: 'smiley-face.png',
+  COOL_FACE: 'cool-face.png',
+  DEAD_FACE: 'dead-face.png',
+  FLAG: 'flag.png',
+  MINE: 'mine.png',
+  WRONG_MINE: 'wrong-mine.png'
 };
 
 const MAX_DISPLAY_TIME = 999;
@@ -30,10 +31,9 @@ let seconds = 0;
 let timerId = null;
 
 const levelsElement = document.querySelector(SELECTORS.LEVELS);
-const mineCountElement = document.querySelector(SELECTORS.MINE_COUNT);
-mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
-const smileyButtonElement = document.querySelector(SELECTORS.SMILEY_BUTTON);
-smileyButtonElement.textContent = EMOJI.SMILE;
+levelsElement.children[0].classList.add(STATE_CLASSES.ACTIVE);
+const mineCounterElement = document.querySelector(SELECTORS.MINE_COUNTER);
+const resetButtonElement = document.querySelector(SELECTORS.RESET_BUTTON);
 const timerElement = document.querySelector(SELECTORS.TIMER);
 const boardElement = document.querySelector(SELECTORS.BOARD);
 let cellElements = [];
@@ -80,8 +80,8 @@ const drawBoard = () => {
 
 const resetGame = (settings = {}) => {
   minesweeper.reset(settings);
-  mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
-  smileyButtonElement.textContent = EMOJI.SMILE;
+  mineCounterElement.textContent = padNumberWithZeros(minesweeper.mineCount);
+  resetButtonElement.style.backgroundImage = getBackgroundImageUrl(IMAGE_FILENAMES.SMILEY_FACE);
   boardElement.style.pointerEvents = '';
   boardElement.style.setProperty('--board-rows', minesweeper.rows);
   boardElement.style.setProperty('--board-columns', minesweeper.columns);
@@ -92,13 +92,16 @@ const resetGame = (settings = {}) => {
 resetGame();
 
 levelsElement.addEventListener('click', (event) => {
-  const level = event.target.dataset.level;
+  const target = event.target;
+  const level = target.dataset.level;
   if (level) {
+    levelsElement.querySelector(`.${STATE_CLASSES.ACTIVE}`)?.classList.remove(STATE_CLASSES.ACTIVE);
+    target.classList.add(STATE_CLASSES.ACTIVE);
     resetGame(LEVELS[level]);
   }
 });
 
-smileyButtonElement.addEventListener('click', () => resetGame());
+resetButtonElement.addEventListener('click', () => resetGame());
 
 boardElement.addEventListener('click', (event) => {
   if (minesweeper.gameOver) {
@@ -122,7 +125,9 @@ boardElement.addEventListener('click', (event) => {
     ({ row: currentRow, column: currentColumn, mine, flagged, adjacentMines }) => {
       const cellElement = cellElements[currentRow][currentColumn];
       if (flagged) {
-        return cellElement.classList.add(STATE_CLASSES.INCORRECT_FLAG);
+        return (cellElement.style.backgroundImage = getBackgroundImageUrl(
+          IMAGE_FILENAMES.WRONG_MINE
+        ));
       }
 
       cellElement.classList.add(STATE_CLASSES.REVEALED);
@@ -130,7 +135,7 @@ boardElement.addEventListener('click', (event) => {
         if (currentRow === row && currentColumn === column) {
           cellElement.classList.add(STATE_CLASSES.MINE);
         }
-        cellElement.textContent = EMOJI.BOMB;
+        cellElement.style.backgroundImage = getBackgroundImageUrl(IMAGE_FILENAMES.MINE);
       } else if (adjacentMines > 0) {
         cellElement.classList.add(`${STATE_CLASSES.NUMBER}-${adjacentMines}`);
         cellElement.textContent = `${adjacentMines}`;
@@ -140,7 +145,9 @@ boardElement.addEventListener('click', (event) => {
 
   if (minesweeper.gameOver) {
     stopTimer();
-    smileyButtonElement.textContent = minesweeper.gameWon ? EMOJI.COOL_FACE : EMOJI.SKULL;
+    resetButtonElement.style.backgroundImage = getBackgroundImageUrl(
+      minesweeper.gameWon ? IMAGE_FILENAMES.COOL_FACE : IMAGE_FILENAMES.DEAD_FACE
+    );
     boardElement.style.pointerEvents = 'none';
   }
 });
@@ -161,6 +168,6 @@ boardElement.addEventListener('contextmenu', (event) => {
 
   const { row, column } = getCellPosition(target);
   const flagged = minesweeper.toggleFlag(row, column);
-  target.textContent = flagged ? EMOJI.FLAG : '';
-  mineCountElement.textContent = padNumberWithZeros(minesweeper.mineCount);
+  target.style.backgroundImage = flagged ? getBackgroundImageUrl(IMAGE_FILENAMES.FLAG) : '';
+  mineCounterElement.textContent = padNumberWithZeros(minesweeper.mineCount);
 });

@@ -8,17 +8,16 @@
     <title>Minesweeper</title>
   </head>
   <body>
-    <div class="levels js-levels">
-      <button class="level-button" type="button" data-level="BEGINNER">Beginner</button>
-      <button class="level-button" type="button" data-level="INTERMEDIATE">Intermediate</button>
-      <button class="level-button" type="button" data-level="EXPERT">Expert</button>
-    </div>
-
     <div class="frame">
+      <div class="levels js-levels">
+        <button class="level-button" type="button" data-level="BEGINNER">Beginner</button>
+        <button class="level-button" type="button" data-level="INTERMEDIATE">Intermediate</button>
+        <button class="level-button" type="button" data-level="EXPERT">Expert</button>
+      </div>
       <div class="panel">
-        <span class="count js-mine-count"></span>
-        <button class="smiley-button js-smiley-button" type="button"></button>
-        <span class="count js-timer"></span>
+        <span class="counter js-mine-counter"></span>
+        <button class="reset-button js-reset-button" type="button" aria-label="Reset"></button>
+        <span class="counter js-timer"></span>
       </div>
       <div class="board js-board"></div>
     </div>

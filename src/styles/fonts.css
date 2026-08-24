@@ -1,0 +1,15 @@
+@font-face {
+  font-family: 'Digital Dismay';
+  src: url('../assets/fonts/DigitalDismay-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Press Start';
+  src: url('../assets/fonts/PressStart-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
